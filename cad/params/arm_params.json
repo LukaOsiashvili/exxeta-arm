@@ -1,0 +1,251 @@
+{
+  "_about": [
+    "exxeta-arm: SINGLE SOURCE of geometry, servo choices, mass estimates and options.",
+    "Everything else (CAD, URDF, kinematics, torque/power budgets, web 3D model) is generated from this file.",
+    "Units in this file: millimetres, grams, degrees, volts, amps (human-friendly). Code converts to SI.",
+    "Keys starting with '_' are comments and are ignored by all tools.",
+    "STATUS: sizing approved by the owner (Option B: 80/80 mm links, 50 g payload). See docs/decisions/ADR-0001."
+  ],
+  "schema_version": 1,
+  "project": { "name": "exxeta-arm", "design_revision": "0.3-phase1" },
+
+  "design_targets": {
+    "_about": "Sizing rules from PROJECT_SPEC 4.3.",
+    "payload_g": 50,
+    "safety_factor_min": 2.0,
+    "_safety_factor_min": "required torque <= rated stall torque at 6 V / safety_factor_min",
+    "clone_torque_fraction": 0.6,
+    "_clone_torque_fraction": "Information only: cheap clones often deliver 50-70 % of rated torque. The budget also prints the margin against this.",
+    "servo_rail_voltage_nominal": 6.0,
+    "servo_rail_voltage_low_battery": 5.4
+  },
+
+  "geometry": {
+    "_about": [
+      "Kinematic chain (SO-101 style): J1 base yaw -> J2 shoulder pitch -> J3 elbow pitch -> J4 wrist pitch -> J5 wrist roll -> J6 gripper.",
+      "TCP = grip centre between the jaws (not the fingertip end).",
+      "Reach = horizontal distance from the J1 axis to the TCP with the arm stretched out horizontally."
+    ],
+    "shoulder_height_mm": 106.5,
+    "_shoulder_height_mm": "J2 axis above the table = base height + 1 + joint_design.shoulder_axis_above_turntable (the CAD checks this).",
+    "shoulder_offset_mm": 0,
+    "_shoulder_offset_mm": "Horizontal distance from the J1 axis to the J2 axis (0 = axes intersect).",
+    "upper_arm_length_mm": 80,
+    "forearm_length_mm": 80,
+    "wrist_to_tcp_mm": 95,
+    "_wrist_to_tcp_mm": "J4 axis to grip centre. Set by packaging: roll servo (~40 mm) + gripper plate + jaw pivot + jaw.",
+    "tcp_to_fingertip_mm": 15,
+    "gripper_opening_max_mm": 50
+  },
+
+  "joints": {
+    "_about": [
+      "Angle conventions (zero pose = arm pointing straight up, gripper up):",
+      "J1: 0 = forward, + = counter-clockwise seen from above.",
+      "J2: 0 = upper arm vertical, + = leaning forward.",
+      "J3: 0 = forearm in line with upper arm, + = bending forward/down.",
+      "J4: 0 = hand in line with forearm, + = bending forward/down.",
+      "J5: 0 = jaws open horizontally (when arm is horizontal), + = right-hand rule about the hand axis.",
+      "J6: 0 = closed, + = open (degrees of servo rotation; each finger moves pinion_radius x angle, see ADR-0006).",
+      "Ranges are preliminary (Phase 1 CAD sets the hard stops). Hobby servos give ~170 deg usable travel.",
+      "max_speed / max_accel are the DEFAULT conservative software caps (PROJECT_SPEC 10.7), not servo limits."
+    ],
+    "J1": { "name": "base_yaw",       "servo": "MG996R", "min_deg": -90, "max_deg": 90, "max_speed_deg_s": 60, "max_accel_deg_s2": 180, "pot": true },
+    "J2": { "name": "shoulder_pitch", "servo": "MG996R", "min_deg": -72,  "max_deg": 90,  "max_speed_deg_s": 45, "max_accel_deg_s2": 120, "pot": true },
+    "J3": { "name": "elbow_pitch",    "servo": "MG996R", "min_deg": -50,  "max_deg": 120, "max_speed_deg_s": 60, "max_accel_deg_s2": 180, "pot": true },
+    "J4": { "name": "wrist_pitch",    "servo": "MG90S",  "min_deg": -85,  "max_deg": 85,  "max_speed_deg_s": 90, "max_accel_deg_s2": 360, "pot": true },
+    "J5": { "name": "wrist_roll",     "servo": "MG90S",  "min_deg": -85,  "max_deg": 85,  "max_speed_deg_s": 90, "max_accel_deg_s2": 360, "pot": false, "_pot": "no J5 pot in v1 (owner decision, ADR-0002): keeps mass off the wrist" },
+    "J6": { "name": "gripper",        "servo": "MG90S",  "min_deg": 0,    "max_deg": 160,  "max_speed_deg_s": 90, "max_accel_deg_s2": 360, "pot": false }
+  },
+
+  "servos": {
+    "_about": [
+      "Rated data from PROJECT_SPEC 4.2, cross-checked against datasheets (see docs/decisions/ADR-0001).",
+      "torque in kgf*cm, stall current in A at 6 V, idle current in A, body size L x W x H in mm (H includes output shaft).",
+      "spline_teeth MUST be re-checked on the purchased parts; we attach through the servo's own horn, so it is not critical."
+    ],
+    "SG90":   { "mass_g": 9,    "stall_torque_kgcm_4v8": 1.8, "stall_torque_kgcm_6v": 2.2,  "speed_s_per_60deg_6v": 0.08, "stall_current_a_6v": 0.7, "idle_current_a": 0.01, "gears": "plastic", "spline_teeth": 21, "body_mm": [22.5, 12.0, 27.0] },
+    "MG90S":  { "mass_g": 13.4, "stall_torque_kgcm_4v8": 1.8, "stall_torque_kgcm_6v": 2.2,  "speed_s_per_60deg_6v": 0.08, "stall_current_a_6v": 0.9, "idle_current_a": 0.01, "gears": "metal",   "spline_teeth": 21, "_spline_teeth": "sources disagree (20T or 21T, ~4.8 mm OD): count on the real part", "body_mm": [22.8, 12.2, 28.5] },
+    "S3003":  { "mass_g": 37,   "stall_torque_kgcm_4v8": 3.2, "stall_torque_kgcm_6v": 4.1,  "speed_s_per_60deg_6v": 0.19, "stall_current_a_6v": 1.0, "idle_current_a": 0.01, "gears": "plastic", "spline_teeth": 25, "body_mm": [40.0, 20.0, 36.0] },
+    "MG995":  { "mass_g": 55,   "stall_torque_kgcm_4v8": 8.5, "stall_torque_kgcm_6v": 10.0, "speed_s_per_60deg_6v": 0.16, "stall_current_a_6v": 2.5, "idle_current_a": 0.01, "gears": "metal",   "spline_teeth": 25, "body_mm": [40.7, 19.7, 42.9] },
+    "MG996R": { "mass_g": 55,   "stall_torque_kgcm_4v8": 9.4, "stall_torque_kgcm_6v": 11.0, "speed_s_per_60deg_6v": 0.14, "stall_current_a_6v": 2.5, "idle_current_a": 0.01, "gears": "metal",   "spline_teeth": 25, "body_mm": [40.7, 19.7, 42.9] }
+  },
+
+  "servo_mech": {
+    "_about": [
+      "Mechanical dimensions of the servos and horns, in mm. Heights are measured from the BOTTOM of the servo case.",
+      "Clone servos differ by up to ~1 mm. MEASURE YOUR SERVOS with calipers and correct these before printing the final parts.",
+      "The single-joint test rig (Phase 1) exists to catch a wrong value here cheaply."
+    ],
+    "MG996R": {
+      "body_l": 40.7, "body_w": 19.7, "case_h": 37.5,
+      "bottom_to_ear": 27.3, "ear_t": 2.5, "ear_len": 54.0,
+      "ear_hole_spacing_l": 49.5, "ear_hole_spacing_w": 10.0,
+      "shaft_offset": 10.2, "_shaft_offset": "shaft axis to the nearer end of the body",
+      "horn_face_h": 44.5, "_horn_face_h": "bottom of case to the outer flat face of the metal round horn when mounted",
+      "horn_d": 20.0, "horn_t": 6.0, "horn_pcd": 14.0, "_horn_pcd": "4 x M3 threaded holes on this pitch circle"
+    },
+    "MG90S": {
+      "body_l": 22.8, "body_w": 12.2, "case_h": 22.8,
+      "bottom_to_ear": 16.5, "ear_t": 2.5, "ear_len": 32.3, "ear_hole_spacing": 27.8,
+      "shaft_offset": 6.2,
+      "boss_h": 27.5, "boss_d": 11.8, "_boss": "round output boss on top of the case",
+      "horn_top_h": 32.5, "_horn_top_h": "bottom of case to the top face of the plastic horn when mounted",
+      "horn_blade_t": 1.6, "horn_len": 33.0, "horn_hub_d": 7.2, "horn_root_w": 5.8, "horn_tip_w": 4.2,
+      "_horn": "the double-arm plastic horn from the servo bag (arms at the top of the hub)"
+    }
+  },
+
+  "joint_design": {
+    "_about": "Construction details of the joints (PROJECT_SPEC 4.3.1). All in mm.",
+    "link_half_width": 13.1, "_link_half_width": "half width of every link in the direction perpendicular to link and joint axis",
+    "wall": 3.0, "wall_thin": 2.4,
+    "cradle_back_wall": 4.0, "pivot_boss_h": 3.0,
+    "fork_horn_arm_t": 4.0, "fork_bearing_arm_t": 9.0, "micro_horn_arm_t": 3.4,
+    "bridge_radius_large": 24.0, "bridge_radius_wrist": 25.5, "bridge_t": 4.0,
+    "bearing_axial_float": 0.7,
+    "shoulder_axis_above_turntable": 40.5,
+    "pivot_pin_flange_d": 11.5, "pivot_pin_flange_t": 2.0,
+    "gripper_pinion_module": 1.0, "gripper_pinion_teeth": 18, "_gripper_pinion": "rack-and-pinion parallel gripper: finger travel = pinion radius x servo angle",
+    "horn_trim_len": 12.0, "_horn_trim_len": "the J5 and J6 double-arm horns are cut to this total length with side cutters",
+    "finger_t": 5.0, "finger_h": 14.0, "finger_pad_t": 3.0
+  },
+
+  "turntable": {
+    "_about": "J1 bearing: printed four-point ball race (ADR-0004). Steel balls roll between two V-grooves.",
+    "ball_d": 6.0, "_ball_d": "6.0 mm steel balls. Bicycle balls of 1/4 inch (6.35) also work: change this value and re-export.",
+    "ball_count": 46,
+    "race_pitch_radius": 46.0,
+    "race_gap": 1.5, "_race_gap": "radial gap between turntable and outer ring",
+    "race_clearance": 0.1, "_race_clearance": "extra room for the balls; preload is set with the clamp-ring screws and paper shims",
+    "pot_gear_module": 1.0, "pot_gear_teeth": 26, "pot_angle_deg": 47,
+    "cable_hole_d": 11.0, "cable_hole_radius": 30.5, "_cable_hole": "cables pass through the turntable here, behind the shoulder",
+    "web_t": 6.0, "rim_t": 10.0, "rim_inner_radius": 36.0
+  },
+
+  "hardware": {
+    "_about": "Catalogue masses of bought parts used in the mass model.",
+    "bearing_pitch": { "type": "608ZZ", "id_mm": 8, "od_mm": 22, "width_mm": 7, "mass_g": 12.0, "_why": "skateboard bearing: sold everywhere. One size on J2, J3 and J4 (ADR-0002)." },
+    "pot": { "type": "WH148 B10K, 6 mm D-shaft, 15 mm shaft", "mass_g": 7.0, "_mass_g": "estimate incl. short wire tail" },
+    "horn_25t_metal_round_g": 6.0,
+    "horn_micro_g": 1.0
+  },
+
+  "mass_model": {
+    "_about": [
+      "Moving masses used by tools/torque_budget.py. Phase 0 = hand estimates (printed parts already include ~15 % contingency).",
+      "Phase 1 replaces every item with source 'estimate-print' by the CAD volume x density x fill factor (cad/export/masses.json).",
+      "Position along the stretched-out arm: 'from' = reference joint axis (J2, J3 or J4), then offset_mm and/or frac x that link's length.",
+      "Links: J2->J3 = upper_arm, J3->J4 = forearm, J4->TCP = hand.",
+      "An item belongs to the link that starts at its 'from' joint, unless 'link' says otherwise (e.g. the elbow servo body sits in the upper arm).",
+      "Items with source 'servo:Jn' take their mass from the servo assigned to that joint (mass_g is then only a reminder).",
+      "radius_from_roll_axis_mm (optional) = distance of the item's centre of mass from the J5 roll axis, for the J5 check.",
+      "cad_parts (added in Phase 1): names of the CAD parts that replace this estimate once cad/export/masses.json exists.",
+      "only_with_pots: item exists only when pots are fitted. The budget ALWAYS assumes pots fitted (worst case)."
+    ],
+    "print": { "material": "PETG", "density_g_cm3": 1.27, "fill_factor": 0.85, "_fill_factor": "thin 3-4 mm walls with 3 perimeters are nearly solid" },
+    "items": [
+      { "name": "upper arm (printed fork + elbow servo cradle)", "mass_g": 45,   "from": "J2", "frac": 0.55, "source": "estimate-print", "cad_parts": ["upper_arm"] },
+      { "name": "J3 servo MG996R (in upper arm, at elbow)",       "mass_g": 55,   "from": "J3", "offset_mm": -8, "link": "upper_arm", "source": "servo:J3" },
+      { "name": "J3 metal horn + horn screws",                    "mass_g": 6,    "from": "J3", "source": "catalogue" },
+      { "name": "J3 passive bearing 608ZZ + pivot pin + M3 screw",  "mass_g": 15,   "from": "J3", "source": "catalogue" },
+      { "name": "J3 pot",                                         "mass_g": 7,    "from": "J3", "source": "catalogue", "only_with_pots": true },
+      { "name": "J3 fasteners (M3 screws + nuts)",                "mass_g": 7,    "from": "J3", "source": "estimate" },
+      { "name": "cables along upper arm (4 servo + 1 pot lead)", "mass_g": 8,    "from": "J2", "frac": 0.5,  "source": "estimate" },
+
+      { "name": "forearm (printed fork + beam + wrist bearing stub)", "mass_g": 28, "from": "J3", "frac": 0.4, "source": "estimate-print", "cad_parts": ["forearm"] },
+      { "name": "cables along forearm",                           "mass_g": 5,    "from": "J3", "frac": 0.5,  "source": "estimate" },
+      { "name": "J4 servo MG90S (at wrist)",                      "mass_g": 13.4, "from": "J4", "source": "servo:J4" },
+      { "name": "J4 horn + passive bearing 608ZZ + pivot pin",     "mass_g": 16,   "from": "J4", "source": "catalogue" },
+      { "name": "J4 pot",                                         "mass_g": 7,    "from": "J4", "source": "catalogue", "only_with_pots": true },
+      { "name": "J4 fasteners",                                   "mass_g": 3,    "from": "J4", "source": "estimate" },
+
+      { "name": "wrist block (printed, holds roll servo)",        "mass_g": 13,   "from": "J4", "offset_mm": 20, "source": "estimate-print", "cad_parts": ["wrist_block", "wrist_cap"] },
+      { "name": "J5 servo MG90S (axial)",                         "mass_g": 13.4, "from": "J4", "offset_mm": 25, "source": "servo:J5" },
+      { "name": "J5 horn + support ring",                         "mass_g": 3,    "from": "J4", "offset_mm": 40, "source": "estimate" },
+      { "name": "gripper body + fixed jaw (printed)",             "mass_g": 18,   "from": "J4", "offset_mm": 58, "radius_from_roll_axis_mm": 8,  "source": "estimate-print", "cad_parts": ["gripper_body"] },
+      { "name": "gripper fingers, pinion, pads (printed)",         "mass_g": 12,   "from": "J4", "offset_mm": 85, "radius_from_roll_axis_mm": 15, "source": "estimate-print", "cad_parts": ["gripper_finger", "gripper_pinion", "fingertip"] },
+      { "name": "J6 servo MG90S (gripper)",                       "mass_g": 13.4, "from": "J4", "offset_mm": 52, "radius_from_roll_axis_mm": 14, "source": "servo:J6" },
+      { "name": "hand fasteners + J6 horn",                       "mass_g": 5,    "from": "J4", "offset_mm": 45, "radius_from_roll_axis_mm": 8,  "source": "estimate" },
+      { "name": "cables in hand",                                 "mass_g": 3,    "from": "J4", "offset_mm": 25, "source": "estimate" }
+    ],
+    "payload": { "at": "TCP", "radius_from_roll_axis_mm": 15, "_radius": "assumed worst-case offset of the payload's centre of mass from the roll axis" },
+    "friction_allowance_kgcm": { "J1": 0.5, "J5": 0.2, "_about": "bearing/cable drag allowance used in the J1 and J5 checks" }
+  },
+
+  "base": {
+    "_about": "Preliminary base data for the tipping check. Finalised by the base CAD (Phase 1/5).",
+    "footprint_mm": [170, 170],
+    "height_mm": 65,
+    "corner_radius_mm": 12, "wall_mm": 3.0, "bottom_panel_t_mm": 3.0,
+    "foot_inset_mm": 12,
+    "_foot_inset_mm": "rubber feet sit this far in from each edge; the tipping line runs through two adjacent feet",
+    "stationary_cad_parts": {
+      "_about": "once the CAD export exists, these entries of stationary_mass_items_g are replaced by the real part masses",
+      "printed base shell + panels + internal mounts": ["base_shell", "base_panel", "j1_bracket", "clamp_ring"],
+      "turntable + shoulder housing (printed)": ["turntable"]
+    },
+    "stationary_mass_items_g": {
+      "printed base shell + panels + internal mounts": 350,
+      "turntable + shoulder housing (printed)": 70,
+      "4 x 18650 cells": 184,
+      "cell holders": 20,
+      "J1 + J2 servos with horns": 122,
+      "ESP32 DevKit + screw-terminal expansion board": 35,
+      "buck converters + charger + BMS": 50,
+      "switch, jack, USB-C extension, LED": 25,
+      "wiring, bulk capacitors, fuse holder": 50,
+      "turntable bearing": 60,
+      "fasteners": 30
+    }
+  },
+
+  "power": {
+    "_about": "Inputs for tools/power_budget.py. See docs/design/power_budget.md and the power ADRs.",
+    "pack": {
+      "configuration": "2S2P",
+      "cell_capacity_mah": 2500,
+      "cell_max_continuous_a": 20,
+      "cell_v_full": 4.2, "cell_v_nominal": 3.6, "cell_v_warn": 3.5, "cell_v_critical": 3.3, "cell_v_bms_cutoff": 2.75,
+      "usable_fraction": 0.75,
+      "_usable_fraction": "energy we can use between the 8.2 V charge voltage and the 3.3 V/cell critical threshold"
+    },
+    "servo_rail": { "voltage": 6.0, "converter_efficiency": 0.88, "converter_continuous_a": 8, "converter_peak_a": 12 },
+    "logic_rail": { "voltage": 5.0, "converter_efficiency": 0.85, "esp32_current_a": 0.15, "led_current_a": 0.03, "pots_current_a": 0.002 },
+    "fuse_a": 15,
+    "main_wire_awg": 16,
+    "_main_wire_awg": "battery -> fuse -> switch -> converters. 16 AWG silicone wire carries well over 15 A; never thinner.",
+    "bms_continuous_a": 20,
+    "main_switch_rating_a": 15,
+    "charger": { "cv_voltage": 8.2, "cc_current_a": 1.5, "adapter": "12 V DC, >= 2 A, 5.5 x 2.1 mm, EU plug (type C/F)" },
+    "firmware_thresholds": {
+      "_about": "Pack-voltage thresholds used by firmware and the safety node. Voltage is low-pass filtered so servo current spikes do not trigger them.",
+      "warn_v": 7.0, "critical_v": 6.6, "hysteresis_v": 0.2, "filter_time_constant_s": 3.0,
+      "servo_power_absent_below_v": 4.5,
+      "charger_present_above_v": 8.1,
+      "servo_rail_min_expected_v": 5.4
+    },
+    "battery_sense_divider": { "r_top_ohm": 100000, "r_bottom_ohm": 33000, "filter_cap_nf": 100 }
+  },
+
+  "tolerances": {
+    "_about": "Global print tolerances (PROJECT_SPEC 4.7). Tuned with the tolerance test print in Phase 1.",
+    "hole_clearance_mm": 0.2,
+    "press_fit_mm": 0.1,
+    "nut_pocket_clearance_mm": 0.15,
+    "bearing_seat_clearance_mm": 0.05,
+    "servo_pocket_clearance_mm": 0.25,
+    "pot_socket_clearance_mm": 0.25
+  },
+
+  "options": {
+    "pots_installed": false,
+    "emboss_exxeta": true,
+    "fastener_type": "captive_nut",
+    "_fastener_type": "captive_nut | heat_set_insert",
+    "pot_shaft": "D6",
+    "_pot_shaft": "D6 (6 mm D-shaft, default) | knurled6 (6 mm knurled/split shaft)"
+  },
+
+  "printer": { "bed_mm": [220, 220, 250] }
+}

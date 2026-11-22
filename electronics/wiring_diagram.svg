@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 700" font-family="Roboto, Arial, sans-serif" font-size="13">
+  <title>exxeta-arm wiring diagram</title>
+  <style>
+    .box { fill: #fff; stroke: #000; stroke-width: 3; }
+    .pwr { stroke: #000; stroke-width: 5; fill: none; }
+    .sig { stroke: #000; stroke-width: 2; fill: none; }
+    .opt { stroke: #000; stroke-width: 2; fill: none; stroke-dasharray: 7 5; }
+    .gnd { stroke: #000; stroke-width: 2; fill: none; stroke-dasharray: 2 4; }
+    .t { font-weight: 700; }
+    .s { font-size: 11px; }
+  </style>
+  <rect width="1180" height="700" fill="#fff"/>
+  <text x="20" y="28" class="t" font-size="18">EXXETA-ARM WIRING (all parts inside the base)</text>
+  <text x="20" y="48" class="s">Thick line = main power, 16 AWG or thicker. Thin line = signal. Dashed = optional. All grounds are joined (common ground).</text>
+
+  <!-- charging -->
+  <rect class="box" x="20" y="80" width="120" height="60"/><text x="30" y="105" class="t">DC JACK</text><text x="30" y="124" class="s">12 V adapter, ≥ 2 A</text>
+  <rect class="box" x="190" y="80" width="150" height="60"/><text x="200" y="105" class="t">CC/CV CHARGER</text><text x="200" y="124" class="s">set to 8.2 V / 1.5 A</text>
+  <path class="pwr" d="M140 110 H190"/>
+  <rect class="box" x="20" y="170" width="120" height="50" stroke-dasharray="7 5"/><text x="30" y="192" class="t">USB-C 5 V</text><text x="30" y="209" class="s">optional</text>
+  <rect class="box" x="190" y="170" width="150" height="50" stroke-dasharray="7 5"/><text x="200" y="192" class="t">2S BOOST CHARGER</text><text x="200" y="209" class="s">optional, arm parked only</text>
+  <path class="opt" d="M140 195 H190"/><path class="opt" d="M340 195 H365 V125"/>
+
+  <!-- pack -->
+  <rect class="box" x="390" y="80" width="150" height="90"/><text x="400" y="105" class="t">2S BMS 20 A</text><text x="400" y="124" class="s">with balancing</text><text x="400" y="142" class="s">P+ / P−  to charger and load</text><text x="400" y="158" class="s">B+ / BM / B−  to cells</text>
+  <path class="pwr" d="M340 110 H390"/>
+  <rect class="box" x="390" y="200" width="150" height="70"/><text x="400" y="225" class="t">2S2P 18650 PACK</text><text x="400" y="244" class="s">4 high-drain cells, holders</text><text x="400" y="260" class="s">6.6 … 8.2 V</text>
+  <path class="pwr" d="M465 170 V200"/>
+
+  <rect class="box" x="590" y="95" width="90" height="50"/><text x="600" y="117" class="t">FUSE 15 A</text><text x="600" y="134" class="s">blade, inline</text>
+  <path class="pwr" d="M540 120 H590"/>
+  <rect class="box" x="720" y="95" width="110" height="50"/><text x="730" y="117" class="t">ROCKER</text><text x="730" y="134" class="s">KCD3, ≥ 15 A</text>
+  <path class="pwr" d="M680 120 H720"/>
+  <path class="pwr" d="M830 120 H900"/>
+  <text x="838" y="110" class="s t">V_BATT (switched)</text>
+  <path class="pwr" d="M900 120 V420"/>
+
+  <!-- servo rail -->
+  <rect class="box" x="940" y="150" width="210" height="64"/><text x="950" y="174" class="t">SERVO BUCK 6.0 V</text><text x="950" y="192" class="s">12 A module (4.5–30 V in) or UBEC ≥ 10 A</text><text x="950" y="207" class="s">set to 6.0 V before connecting servos</text>
+  <path class="pwr" d="M900 182 H940"/>
+  <rect class="box" x="940" y="250" width="210" height="90"/><text x="950" y="274" class="t">SERVO DISTRIBUTION</text><text x="950" y="292" class="s">6 × 3-pin headers (GND, 6 V, signal)</text><text x="950" y="308" class="s">1000–2200 µF low-ESR capacitor across</text><text x="950" y="324" class="s">6 V and GND, right at the headers</text>
+  <path class="pwr" d="M1045 214 V250"/>
+  <rect class="box" x="940" y="380" width="210" height="50"/><text x="950" y="402" class="t">6 SERVOS  J1 … J6</text><text x="950" y="420" class="s">3 × MG996R, 3 × MG90S</text>
+  <path class="pwr" d="M1045 340 V380"/>
+
+  <!-- logic rail -->
+  <rect class="box" x="640" y="250" width="170" height="64"/><text x="650" y="274" class="t">LOGIC BUCK 5.3 V</text><text x="650" y="292" class="s">MP1584 / Mini360, ≥ 1 A</text><text x="650" y="307" class="s">set to 5.3 V</text>
+  <path class="pwr" d="M900 282 H810"/>
+  <rect class="box" x="640" y="350" width="170" height="44"/><text x="650" y="370" class="t">SCHOTTKY 1N5819</text><text x="650" y="386" class="s">stripe (cathode) towards ESP32</text>
+  <path class="sig" d="M725 314 V350"/>
+
+  <!-- divider -->
+  <rect class="box" x="640" y="430" width="170" height="70"/><text x="650" y="452" class="t">BATTERY DIVIDER</text><text x="650" y="470" class="s">V_BATT — 100 kΩ —●— 33 kΩ — GND</text><text x="650" y="487" class="s">100 nF from ● to GND</text>
+  <path class="sig" d="M900 420 V465 H810"/>
+
+  <!-- ESP32 -->
+  <rect class="box" x="300" y="350" width="260" height="300"/>
+  <text x="312" y="376" class="t" font-size="16">ESP32 DEVKIT (38 PIN)</text>
+  <text x="312" y="394" class="s">on a screw-terminal expansion board</text>
+  <text x="312" y="424">5V (VIN)</text><text x="312" y="448">GND</text><text x="312" y="472">GPIO 32   battery sense</text>
+  <text x="312" y="496">GPIO 13 16 17 18 19 23   servo J1…J6</text><text x="312" y="520">GPIO 27   LED data</text>
+  <text x="312" y="544">GPIO 36 39 34 35   pots J1…J4</text><text x="312" y="568">3V3   pot supply</text>
+  <text x="312" y="592">GPIO 33   spare analog</text><text x="312" y="616">GPIO 21 / 22   spare I2C</text><text x="312" y="640">USB   to panel USB-C socket</text>
+  <path class="sig" d="M640 372 H600 V420 H560"/>
+  <path class="sig" d="M640 465 H610 V468 H560"/>
+  <path class="sig" d="M560 492 H590 V560 H880 V300 H940"/>
+  <text x="600" y="555" class="s">6 signal wires</text>
+  <path class="gnd" d="M560 444 H620 V530 H920 V330 H940"/>
+  <text x="700" y="525" class="s">common ground</text>
+
+  <rect class="box" x="60" y="440" width="170" height="50"/><text x="70" y="462" class="t">RGB LED WS2812</text><text x="70" y="479" class="s">5 V, GND, data via 330 Ω</text>
+  <path class="sig" d="M230 465 H270 V516 H300"/>
+  <rect class="box" x="60" y="520" width="170" height="64" stroke-dasharray="7 5"/><text x="70" y="542" class="t">4 × POT B10K</text><text x="70" y="559" class="s">optional: ends to 3V3 and GND,</text><text x="70" y="574" class="s">wiper to the GPIO</text>
+  <path class="opt" d="M230 552 H300"/>
+  <rect class="box" x="60" y="610" width="170" height="40"/><text x="70" y="635" class="t">USB-C PANEL SOCKET</text>
+  <path class="sig" d="M230 636 H300"/>
+</svg>

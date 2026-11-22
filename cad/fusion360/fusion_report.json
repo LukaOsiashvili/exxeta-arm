@@ -1,0 +1,86 @@
+{
+  "_about": "Written by build_exxeta_arm.py. Volumes include bought parts (servo and bearing dummies). Compare with cad/export/masses.json and docs/design/cad_checks.md.",
+  "base": {
+    "volume_cm3": 341.539,
+    "bbox_mm": [
+      170.02,
+      170.02,
+      75.04
+    ]
+  },
+  "turntable": {
+    "volume_cm3": 99.064,
+    "bbox_mm": [
+      90.52,
+      90.52,
+      69.87
+    ]
+  },
+  "upper_arm": {
+    "volume_cm3": 68.467,
+    "bbox_mm": [
+      26.22,
+      65.22,
+      110.47
+    ]
+  },
+  "forearm": {
+    "volume_cm3": 28.82,
+    "bbox_mm": [
+      26.22,
+      65.22,
+      106.22
+    ]
+  },
+  "wrist": {
+    "volume_cm3": 31.585,
+    "bbox_mm": [
+      33.99,
+      47.94,
+      51.31
+    ]
+  },
+  "gripper": {
+    "volume_cm3": 23.339,
+    "bbox_mm": [
+      38.02,
+      33.22,
+      43.37
+    ]
+  },
+  "pinion": {
+    "volume_cm3": 0.858,
+    "bbox_mm": [
+      20.01,
+      19.8,
+      4.72
+    ]
+  },
+  "finger_a": {
+    "volume_cm3": 5.452,
+    "bbox_mm": [
+      37.23,
+      22.88,
+      39.03
+    ]
+  },
+  "finger_b": {
+    "volume_cm3": 5.452,
+    "bbox_mm": [
+      37.23,
+      22.88,
+      39.03
+    ]
+  },
+  "log": [
+    "base: 2 file(s)",
+    "turntable: 2 file(s)",
+    "upper_arm: 2 file(s)",
+    "forearm: 1 file(s)",
+    "wrist: 2 file(s)",
+    "gripper: 2 file(s)",
+    "pinion: 1 file(s)",
+    "finger_a: 1 file(s)",
+    "finger_b: 1 file(s)"
+  ]
+}

@@ -1,0 +1,73 @@
+# exxeta-arm dataflow: REAL ARM (ESP32 over USB serial or Wi-Fi).
+#
+#   cd dora
+#   dora run dataflows/hardware.yml --uv
+#
+# Identical to sim.yml except for the first node (arm_bridge instead of sim_bridge).
+# Data flow:  web_server -> planner -> safety -> bridge -> state_estimator -> everyone
+nodes:
+  - id: bridge
+    path: ../nodes/arm_bridge/main.py
+    inputs:
+      tick: dora/timer/millis/20
+      joint_targets: safety/joint_targets
+      control: safety/control
+    outputs: [joint_state, device_status, battery]
+
+  - id: state_estimator
+    path: ../nodes/state_estimator/main.py
+    inputs:
+      joint_state: bridge/joint_state
+    outputs: [estimated_state]
+
+  - id: kinematics
+    path: ../nodes/kinematics/main.py
+    inputs:
+      estimated_state: state_estimator/estimated_state
+      ik_query: web_server/ik_query
+    outputs: [ee_pose, ik_result]
+
+  - id: planner
+    path: ../nodes/planner/main.py
+    inputs:
+      tick: dora/timer/millis/20
+      ui_command: web_server/ui_command
+      program_command: recorder/program_command
+      estimated_state: state_estimator/estimated_state
+      safety_status: safety/safety_status
+    outputs: [joint_goals, planner_status]
+
+  - id: safety
+    path: ../nodes/safety/main.py
+    inputs:
+      tick: dora/timer/millis/20
+      joint_goals: planner/joint_goals
+      ui_command: web_server/ui_command
+      device_status: bridge/device_status
+      estimated_state: state_estimator/estimated_state
+      planner_status: planner/planner_status
+      battery: bridge/battery
+    outputs: [joint_targets, control, safety_status]
+
+  - id: recorder
+    path: ../nodes/recorder/main.py
+    inputs:
+      tick: dora/timer/millis/20
+      ui_command: web_server/ui_command
+      estimated_state: state_estimator/estimated_state
+      planner_status: planner/planner_status
+    outputs: [program_command, recorder_status]
+
+  - id: web_server
+    path: ../nodes/web_server/main.py
+    inputs:
+      tick: dora/timer/millis/50
+      estimated_state: state_estimator/estimated_state
+      ee_pose: kinematics/ee_pose
+      safety_status: safety/safety_status
+      device_status: bridge/device_status
+      battery: bridge/battery
+      planner_status: planner/planner_status
+      recorder_status: recorder/recorder_status
+      ik_result: kinematics/ik_result
+    outputs: [ui_command, ik_query]

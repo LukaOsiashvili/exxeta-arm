@@ -1,0 +1,97 @@
+{
+  "base": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "files": [
+      "base_printed.step",
+      "base_bought.step"
+    ]
+  },
+  "turntable": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      106.5
+    ],
+    "files": [
+      "turntable_printed.step",
+      "turntable_bought.step"
+    ]
+  },
+  "upper_arm": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      106.5
+    ],
+    "files": [
+      "upper_arm_printed.step",
+      "upper_arm_bought.step"
+    ]
+  },
+  "forearm": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      186.5
+    ],
+    "files": [
+      "forearm_printed.step"
+    ]
+  },
+  "wrist": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      266.5
+    ],
+    "files": [
+      "wrist_printed.step",
+      "wrist_bought.step"
+    ]
+  },
+  "gripper": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      266.5
+    ],
+    "files": [
+      "gripper_printed.step",
+      "gripper_bought.step"
+    ]
+  },
+  "pinion": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      266.5
+    ],
+    "files": [
+      "pinion_printed.step"
+    ]
+  },
+  "finger_a": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      266.5
+    ],
+    "files": [
+      "finger_a_printed.step"
+    ]
+  },
+  "finger_b": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      266.5
+    ],
+    "files": [
+      "finger_b_printed.step"
+    ]
+  }
+}

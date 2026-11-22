@@ -1,0 +1,36 @@
+# AI prompt and agent rules, not part of the project
+FABLE_PROMPT.md
+CLAUDE.md
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+!docs/build/
+.pytest_cache/
+
+# PlatformIO build output
+firmware/.pio/
+firmware/.vscode/
+
+# dora runtime output
+.dora/
+dora/**/out/
+dora/out/
+
+# Per-arm / per-user data created by the app
+config/calibration/
+config/poses.json
+data/recordings/*.csv
+
+# Leftovers, editors, OS
+.claude_launch_tmp
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+docs/img/_*

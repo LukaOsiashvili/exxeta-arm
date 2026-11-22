@@ -1,0 +1,25 @@
+# exxeta-arm runtime configuration. Every tunable value of the PC software lives here.
+# Units: SI (metres, radians, seconds) unless the name says otherwise.
+
+web:
+  port: 8080
+  access_token: ""        # set to e.g. "robot123" to require http://<pc>:8080/?token=robot123
+
+arm:                      # real hardware (dataflows/hardware.yml)
+  auto_connect: false     # false: connect from the web app (Connection panel)
+  transport: serial       # serial | wifi   (can be switched in the app without restarting)
+  serial_port: ""         # e.g. COM5 (Windows), /dev/ttyUSB0 (Linux), /dev/cu.usbserial-0001 (macOS)
+  wifi_host: exxeta-arm.local   # or the IP address shown by the firmware CLI ("status")
+  token: 0                # must match the token stored in the arm (0 = none)
+
+sim:                      # simulated arm (dataflows/sim.yml)
+  auto_connect: true
+  pots: false             # true: pretend pots are fitted on J1..J4 (shows the ghost overlay)
+  battery_v: 8.1          # start voltage; try 7.05 to see the low-battery warning quickly
+
+planner:
+  speed_scale: 0.4        # conservative default for new users (PROJECT_SPEC 10.7); the app can change it
+  max_speed_scale: 1.0
+
+safety:
+  speed_scale: 1.0        # hard cap applied after the planner: 1.0 = the joint limits in arm_params.json

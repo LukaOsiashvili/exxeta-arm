@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <title>EXXETA ARM</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- "three" resolves to the copy stored in this project: the app works without internet and without Node -->
+  <script type="importmap">{ "imports": { "three": "./vendor/three/three.module.js" } }</script>
+</head>
+<body>
+  <header>
+    <div class="brand">EXXETA&nbsp;ARM</div>
+    <div class="chip" id="chip-source">—</div>
+    <div class="chip" id="chip-mode">OFFLINE</div>
+    <div class="chip" id="chip-battery">— %</div>
+    <button id="btn-control" class="small">TAKE CONTROL</button>
+  </header>
+  <div id="banner" class="banner hidden"></div>
+
+  <main>
+    <section id="view">
+      <div id="canvas-wrap"></div>
+      <div class="view-buttons">
+        <button data-view="iso" class="small">ISO</button>
+        <button data-view="front" class="small">FRONT</button>
+        <button data-view="side" class="small">SIDE</button>
+        <button data-view="top" class="small">TOP</button>
+        <button id="btn-target" class="small">TARGET</button>
+      </div>
+      <div id="target-bar" class="target-bar hidden">
+        <span id="target-info">DRAG THE TARGET</span>
+        <button id="btn-target-go" class="small">GO THERE</button>
+      </div>
+      <div id="pose-readout" class="readout"></div>
+    </section>
+
+    <section id="panels">
+      <div class="power-row">
+        <button id="btn-enable">ENABLE</button>
+        <button id="btn-disable">DISABLE</button>
+        <button id="btn-park">PARK &amp; POWER OFF</button>
+      </div>
+      <nav class="tabs">
+        <button data-tab="joints" class="active">JOINTS</button>
+        <button data-tab="cart">XYZ</button>
+        <button data-tab="poses">POSES</button>
+        <button data-tab="programs">PROGRAMS</button>
+        <button data-tab="setup">SETUP</button>
+      </nav>
+
+      <div class="tab" id="tab-joints"><div id="joint-list"></div></div>
+
+      <div class="tab hidden" id="tab-cart">
+        <div class="jog-grid" id="jog-grid"></div>
+        <div class="sticks">
+          <div class="stick" id="stick-xy"><div class="knob"></div><span>X / Y</span></div>
+          <div class="stick" id="stick-zp"><div class="knob"></div><span>Z / PITCH</span></div>
+        </div>
+        <p class="hint">Hold a button or drag a pad to move. Release to stop. X = forward, Y = left, Z = up.</p>
+      </div>
+
+      <div class="tab hidden" id="tab-poses">
+        <div class="row"><input id="pose-name" placeholder="NEW POSE NAME" maxlength="24"><button id="btn-pose-save">SAVE CURRENT</button></div>
+        <div id="pose-list" class="list"></div>
+      </div>
+
+      <div class="tab hidden" id="tab-programs">
+        <h3>WAYPOINT PROGRAM</h3>
+        <div class="row"><input id="prog-name" placeholder="PROGRAM NAME" maxlength="24">
+          <button id="btn-wp-add">+ WAYPOINT</button><button id="btn-prog-save">SAVE</button></div>
+        <div id="wp-list" class="list"></div>
+        <h3>SAVED</h3>
+        <div id="prog-list" class="list"></div>
+        <div class="row">
+          <label>SPEED <input id="play-speed" type="number" min="0.1" max="2" step="0.1" value="1"></label>
+          <label class="check"><input id="play-loop" type="checkbox"> LOOP</label>
+        </div>
+        <div class="row">
+          <button id="btn-pause">PAUSE</button><button id="btn-resume">RESUME</button>
+          <button id="btn-step">STEP</button><button id="btn-play-stop">END</button>
+        </div>
+        <div id="play-status" class="hint"></div>
+        <h3>CONTINUOUS RECORDING</h3>
+        <div class="row"><button id="btn-rec">● RECORD</button><span id="rec-status" class="hint"></span></div>
+      </div>
+
+      <div class="tab hidden" id="tab-setup">
+        <h3>CONNECTION</h3>
+        <div class="row">
+          <select id="conn-transport"><option value="serial">USB SERIAL</option><option value="wifi">WI-FI</option></select>
+          <select id="conn-port"></select>
+          <input id="conn-host" class="hidden" value="exxeta-arm.local" placeholder="HOST OR IP">
+        </div>
+        <div class="row"><button id="btn-connect">CONNECT</button><button id="btn-disconnect">DISCONNECT</button></div>
+        <div id="conn-info" class="hint"></div>
+
+        <h3>SPEED</h3>
+        <div class="row"><input id="speed" type="range" min="5" max="100" value="40"><output id="speed-out">40 %</output></div>
+
+        <h3>CALIBRATION (ARM DISABLED)</h3>
+        <div class="row">
+          <select id="cal-joint"></select>
+          <output id="cal-us">1500 µs</output>
+        </div>
+        <div class="row">
+          <button data-cal="-50">−50</button><button data-cal="-10">−10</button><button data-cal="-2">−2</button>
+          <button data-cal="2">+2</button><button data-cal="10">+10</button><button data-cal="50">+50</button>
+        </div>
+        <div class="row">
+          <button id="btn-cal-zero">1 · SET 0°</button>
+          <label>REF ° <input id="cal-ref" type="number" value="90" step="1"></label>
+          <button id="btn-cal-ref">2 · SET REF</button>
+        </div>
+        <div class="row"><button id="btn-cal-save">3 · SAVE TO ARM</button></div>
+        <div id="cal-info" class="hint">Jog until the notch lines up with the mark at 0°, press SET 0°. Then jog to the 90° notch and press SET REF.</div>
+
+        <h3>ARM WI-FI</h3>
+        <div class="row"><input id="wifi-ssid" placeholder="NETWORK NAME"><input id="wifi-pass" type="password" placeholder="PASSWORD"></div>
+        <div class="row"><button id="btn-wifi">SEND TO ARM</button></div>
+
+        <h3>LIMITS (READ ONLY)</h3>
+        <div id="limits" class="hint mono"></div>
+        <h3>PHONE</h3>
+        <div id="phone-url" class="hint mono"></div>
+        <h3>LOG</h3>
+        <div id="log" class="log"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <button id="btn-clear" class="hidden">ACKNOWLEDGE &amp; RESUME</button>
+    <button id="btn-stop">STOP</button>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
